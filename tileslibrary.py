@@ -450,33 +450,7 @@ def rotate_and_rescale(A, B, angle, new_length):
     scale_factor = new_length / norm_AB
     C = A + scale_factor * rotated
     return C
-
-
-def output_csv_coords(coords, Z, factor=1.0):
-    # outputs real space coordinates of the vertices in a csv file 
-    # to import in AutoCAD
-    no_edges = coords[1:-1, 1:-1, :]
-
-    m = no_edges.shape[0]
-    n = no_edges.shape[1]
-
-    X_coords = no_edges[:, :, 0] * factor
-    Y_coords = no_edges[:, :, 1] * factor
-
-    X_coords = X_coords.reshape((m * n, 1))
-    Y_coords = Y_coords.reshape((m * n, 1))
-
-    workbook = xlsxwriter.Workbook(Z + '.xlsx')
-    worksheet = workbook.add_worksheet()
-
-    worksheet.write(0, 0, 'mm')
-    worksheet.write(1, 0, 'x')
-    worksheet.write(1, 1, 'y')
-
-    for i in range(m * n):
-        worksheet.write(2 + i, 0, X_coords[i])
-        worksheet.write(2 + i, 1, Y_coords[i])
-
+    
 
 def convert_symbolic_real_space(tiling, angles_4, top_l, left_l, sidelength):
     # converts a symbolic tiling into a real space origami pattern
@@ -586,6 +560,7 @@ def convert_symbolic_real_space(tiling, angles_4, top_l, left_l, sidelength):
 
 
 
+# Here I define the 34 tiles 
 
 sups = [np.array([[0, 0, 0, 0],
                   [0, 0, 0, 0],
