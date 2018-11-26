@@ -18,7 +18,7 @@ plt.rc('text', usetex=False)
 rc('font', **{'size': 16})
 
 
-def plot_tiling(coords, raw_tiling, name):
+def plot_tiling_real_space(coords, raw_tiling, name):
     plt.figure()
 
     m = coords.shape[0]
@@ -227,9 +227,9 @@ if __name__ == "__main__":
     angles_rad = angles_deg * np.pi / 180.0
     top = tiling[3]
     left = tiling[4]
-    coords = tl.draw_tiling(tiling, angles_rad, top, left, 0.5)
+    coords = tl.convert_symbolic_real_space(tiling, angles_rad, top, left, 0.5)
     tl.output_csv_coords(coords, Z, 15)
     tiling = packed[1]
     raw_tiling = packed[0]
 
-    plot_tiling(coords, raw_tiling, Z)
+    plot_tiling_real_space(coords, raw_tiling, Z)

@@ -3,11 +3,16 @@ import xlsxwriter
 from matplotlib import pyplot as plt
 from copy import deepcopy
 
+# Here I define the 34 prototiles / 140 bricks
+# as well as several functions for plotting the tilings 
+# that can be constructed using these bricks
 
 def draw_tile_symbolic(ax, bricks, bricktype, index, sup_index,\
         orientation, xpos, ypos, letter, font_size, linewidth, cornersize,\
         middlesize, sup_size, circle_size, indentsize,\
         prototile=False, full=False):
+
+    # This function can plot a m * n tiling in its symbolic representation 
 
     convert_directions = {'n': 0, 'w': 1, 's': 2, 'e': 3}
     brick = bricks[bricktype][index][sup_index]
@@ -203,7 +208,7 @@ def draw_tile_symbolic(ax, bricks, bricktype, index, sup_index,\
         v44 = plt.Polygon(np.transpose(np.array([quarter_circle_x,
                                                  quarter_circle_y])),
                           color=colors_sup[brick[2, 1] - 1],
-                          linewidth= linewidth,
+                          linewidth=linewidth,
                           zorder=1)
         ax.add_patch(v44)
 
@@ -354,50 +359,8 @@ def draw_tile_symbolic(ax, bricks, bricktype, index, sup_index,\
     return ax
 
 
-def plot_tiling(ax, coords, raw_tiling, name, 
-                linewidth, vertexsize, linewidth_vertex):
-    m = coords.shape[0]
-    n = coords.shape[1]
-
-    for i in range(m - 1):
-        for j in range(n - 2):
-            ax.plot(np.array([coords[i, j + 1, 0],
-                               coords[i + 1, j + 1, 0]]),
-                     np.array([coords[i, j + 1, 1], coords[i + 1, j + 1, 1]]),
-                     c='k', lw=linewidth, zorder=0)
-
-    for j in range(n - 1):
-        for i in range(m - 2):
-            ax.plot(np.array([coords[i + 1, j, 0], coords[i + 1, j + 1, 0]]),
-                     np.array([coords[i + 1, j, 1], coords[i + 1, j + 1, 1]]),
-                     c='k', lw=linewidth, zorder=0)
-    k = m * n
-
-    for i in range(m - 2):
-        for j in range(n - 2):
-            if(4 * i == raw_tiling.shape[0]):
-                vertex_x = 4 * i - 1
-            else:
-                vertex_x = 4 * i
-            if(4 * j == raw_tiling.shape[1]):
-                vertex_y = 4 * j - 1
-            else:
-                vertex_y = 4 * j
-            VERTEX = raw_tiling[vertex_x, vertex_y]
-
-            if(VERTEX < 5):
-                ax.scatter(coords[i + 1, j + 1, 0], coords[i + 1, j + 1, 1],
-                            c='w', edgecolor='k', s=vertexsize / float(k),
-                            marker='o', linewidth=linewidth_vertex, zorder=2)
-
-            if(VERTEX > 4):
-                ax.scatter(coords[i + 1, j + 1, 0], coords[i + 1, j + 1, 1],
-                            c='gray', edgecolor='k', s=vertexsize / float(k),
-                            marker='o', linewidth=linewidth_vertex, zorder=2)
-    return ax   
-
 def cyclifier(proto, cyclic_permutations, i):
-    # this function generates cyclic permutations
+    #cyclic permutations of prototiles to generate all 34/140
     proto = 10 * proto
     if(i == 0):
         return proto / 10
@@ -430,6 +393,7 @@ def cyclifier(proto, cyclic_permutations, i):
         return '?????'
 
 def circlefier(theta, diameter):
+    # used to construct & plot a certain of a circle
     points = np.linspace(0, theta, 100)
     x = - 0.5 * diameter * np.cos(points) + 0.5 * diameter
     y = 0.5 * diameter * np.sin(points)
@@ -437,6 +401,7 @@ def circlefier(theta, diameter):
 
 
 def rotatexy(X, angle):
+    # rotate a vector X around an angle 
     theta = np.radians(angle)
     c, s = np.cos(theta), np.sin(theta)
     R = np.matrix([[c, - s], [s, c]])
@@ -444,6 +409,7 @@ def rotatexy(X, angle):
 
 
 def rot_vector(tile, orientation):
+    # rotate a tile exactly 90 degrees (in symbolic representation)
     if(orientation == 'n'):
         return tile
     elif(orientation == 'w'):
@@ -455,6 +421,7 @@ def rot_vector(tile, orientation):
 
 
 def extract_tiling(tiling):
+    # function to unpack relevant parameters from 'tiling'
     m, n = tiling[1].shape[0], tiling[1].shape[1]
     raw = tiling[0]
     kolom1 = 4 * np.arange(0, n - 1) + 4
@@ -486,6 +453,8 @@ def rotate_and_rescale(A, B, angle, new_length):
 
 
 def output_csv_coords(coords, Z, factor=1.0):
+    # outputs real space coordinates of the vertices in a csv file 
+    # to import in AutoCAD
     no_edges = coords[1:-1, 1:-1, :]
 
     m = no_edges.shape[0]
@@ -509,7 +478,17 @@ def output_csv_coords(coords, Z, factor=1.0):
         worksheet.write(2 + i, 1, Y_coords[i])
 
 
-def draw_tiling(tiling, angles_4, top_l, left_l, sidelength):
+def convert_symbolic_real_space(tiling, angles_4, top_l, left_l, sidelength):
+    # converts a symbolic tiling into a real space origami pattern
+    # 
+    # for this we require the tiling itself
+    # the 4 angles of the vertex
+    # the length of the line-elements on the top boundary
+    # the length of the line-elements of the left boundary
+    # the length of the dangling edges (sidelength)
+    # returns an array named coords which links the vertex at 
+    # discrete  position m,n into a x and y coordinate (float)
+
     angles = np.hstack([angles_4, np.pi - angles_4])
     m, n, tiling = extract_tiling(tiling)
     top_l_2 = np.hstack([np.array([sidelength]),
@@ -612,8 +591,6 @@ sups = [np.array([[0, 0, 0, 0],
                   [0, 0, 0, 0],
                   [0, 0, 0, 0],
                   [0, 0, 0, 0]])]
-
-# sups.append()
 
 sups.append(np.array([[4, 4, 0, 0],
                       [4, 4, 0, 0],
@@ -835,5 +812,5 @@ for brick_type in convert_cd:
 
 
 if __name__ == "__main__":
-    print('main')
+    print 'main'
 
